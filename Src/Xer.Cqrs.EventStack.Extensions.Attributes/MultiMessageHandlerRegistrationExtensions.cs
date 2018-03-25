@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using Xer.Cqrs.EventStack.Extensions.Attributes;
 
-namespace Xer.Delegator.Registrations
+namespace Xer.Delegator.Registration
 {
     public static class MultiMessageHandlerRegistrationExtensions
     {
