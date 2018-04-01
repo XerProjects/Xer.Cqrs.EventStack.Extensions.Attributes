@@ -2,10 +2,16 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard1.0</TargetFramework>
+    <Authors>jeyjeyemem;mvput;xerprojects-contributors;</Authors>
+    <Description>A very simple library for handling events on applications based on the CQRS pattern.</Description>
+    <Copyright>Copyright (c) XerProjects contributors</Copyright>
+    <PackageLicenseUrl>https://github.com/XerProjects/Xer.Cqrs.EventStack.Extensions.Attributes/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/XerProjects/Xer.Cqrs.EventStack.Extensions.Attributes</PackageProjectUrl>
+    <PackageTags>cqrs;attribute;domain-event;eventing;event;event-handler;event-message;</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Xer.Delegator" Version="0.4.0" />
+    <PackageReference Include="Xer.Delegator" Version="1.0.0" />
   </ItemGroup>
 
 </Project>

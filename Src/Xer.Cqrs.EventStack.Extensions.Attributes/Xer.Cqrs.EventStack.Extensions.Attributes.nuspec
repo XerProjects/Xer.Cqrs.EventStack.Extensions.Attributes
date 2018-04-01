@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>Xer.Cqrs.EventStack.Extensions.Attributes</id>
+    <version>1.0.0</version>
+    <title>Xer.Cqrs.EventStack.Extensions.Attributes</title>
+    <authors>jeyjeyemem</authors>
+    <owners>jeyjeyemem</owners>
+    <licenseUrl>https://github.com/XerProjects/Xer.Cqrs.EventStack.Extensions.Attributes/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/XerProjects/Xer.Cqrs.EventStack.Extensions.Attributes</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Attribute-based registration extension for Xer.Cqrs.EventStack.</description>
+    <summary>Attribute-based registration extension for Xer.Cqrs.EventStack.</summary>
+    <releaseNotes>
+    - Initial release
+    </releaseNotes>
+    <copyright>Copyright 2017</copyright>
+    <tags>CQRS Event Handler Attribute</tags>
+  </metadata>
+  <files>
+    <file src="bin\Release\netstandard1.0\*.dll" target="lib\netstandard1.0" />
+  </files>
+</package>
