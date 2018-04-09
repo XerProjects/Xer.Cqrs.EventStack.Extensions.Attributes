@@ -62,6 +62,27 @@ namespace Xer.Cqrs.EventStack.Extensions.Attributes.Tests.Entities
         }
 
         [EventHandler]
+        public Task HandleTestEvent1Async(TestEvent1 @event, CancellationToken ctx)
+        {
+            BaseHandle(@event);
+            return Task.CompletedTask;
+        }
+
+        [EventHandler]
+        public Task HandleTestEvent2Async(TestEvent2 @event, CancellationToken ctx)
+        {
+            BaseHandle(@event);
+            return Task.CompletedTask;
+        }
+
+        [EventHandler]
+        public Task HandleTestEvent3Async(TestEvent3 @event, CancellationToken ctx)
+        {
+            BaseHandle(@event);
+            return Task.CompletedTask;
+        }
+
+        [EventHandler]
         public Task HandleLongRunningEventAsync(LongRunningEvent @event, CancellationToken cancellationToken)
         {
             BaseHandle(@event);
