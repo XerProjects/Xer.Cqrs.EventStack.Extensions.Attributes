@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,7 +17,6 @@ namespace Xer.Cqrs.EventStack.Extensions.Attributes
     {
         #region Static Declarations
         
-        private static readonly ParameterExpression CancellationTokenParameterExpression = Expression.Parameter(typeof(CancellationToken), "cancellationToken");
         private static readonly MethodInfo BuildWrappedSyncDelegateOpenGenericMethodInfo = typeof(EventHandlerAttributeMethod).GetTypeInfo().GetDeclaredMethod(nameof(BuildWrappedSyncDelegate));
         private static readonly MethodInfo BuildCancellableAsyncDelegateOpenGenericMethodInfo = typeof(EventHandlerAttributeMethod).GetTypeInfo().GetDeclaredMethod(nameof(BuildCancellableAsyncDelegate));
         private static readonly MethodInfo BuildNonCancellableAsyncDelegateOpenGenericMethodInfo = typeof(EventHandlerAttributeMethod).GetTypeInfo().GetDeclaredMethod(nameof(BuildNonCancellableAsyncDelegate));
@@ -105,18 +103,18 @@ namespace Xer.Cqrs.EventStack.Extensions.Attributes
                 {
                     if (SupportsCancellation)
                     {
-                        // Invoke BuildCancellableAsyncDelegate<TDeclaringType, TEvent>(attributedObjectFactory)
+                        // Invoke BuildCancellableAsyncDelegate<TDeclaringType, TEvent>()
                         return InvokeDelegateBuilderMethod(BuildCancellableAsyncDelegateOpenGenericMethodInfo);
                     }
                     else
                     {
-                        // Invoke BuildNonCancellableAsyncDelegate<TDeclaringType, TEvent>(attributedObjectFactory)
+                        // Invoke BuildNonCancellableAsyncDelegate<TDeclaringType, TEvent>()
                         return InvokeDelegateBuilderMethod(BuildNonCancellableAsyncDelegateOpenGenericMethodInfo);
                     }
                 }
                 else
                 {
-                    // Invoke BuildWrappedSyncDelegate<TDeclaringType, TEvent>(attributedObjectFactory)
+                    // Invoke BuildWrappedSyncDelegate<TDeclaringType, TEvent>()
                     return InvokeDelegateBuilderMethod(BuildWrappedSyncDelegateOpenGenericMethodInfo);
                 }
             }
@@ -135,27 +133,16 @@ namespace Xer.Cqrs.EventStack.Extensions.Attributes
         /// </summary>
         /// <typeparam name="TAttributed">Type that contains [EventHandler] methods. This should match DeclaringType property.</typeparam>
         /// <typeparam name="TEvent">Type of event that is handled by the EventHandlerAttributeMethod. This should match EventType property.</typeparam>
-        /// <param name="attributedObjectFactory">Factory delegate which provides an instance of a class that contains methods marked with [EventHandler] attribute.</param>
         /// <returns>Delegate that handles an event.</returns>
-        private MessageHandlerDelegate BuildCancellableAsyncDelegate<TAttributed, TEvent>(Func<object> attributedObjectFactory)
+        private MessageHandlerDelegate BuildCancellableAsyncDelegate<TAttributed, TEvent>()
             where TAttributed : class
             where TEvent : class
         {
-            // Create an expression that will invoke the event handler method of a given instance.
-            ParameterExpression instanceParameterExpression = Expression.Parameter(typeof(TAttributed), "instance");
-            ParameterExpression eventParameterExpression = Expression.Parameter(typeof(TEvent), "event");
-            MethodCallExpression callExpression = Expression.Call(instanceParameterExpression, MethodInfo, eventParameterExpression, CancellationTokenParameterExpression);
+            // Create a delegate from method info. First argument is the target object.
+            Func<TAttributed, TEvent, CancellationToken, Task> cancellableAsyncDelegate = (Func<TAttributed, TEvent, CancellationToken, Task>)
+                MethodInfo.CreateDelegate(typeof(Func<TAttributed, TEvent, CancellationToken, Task>));
 
-            // Lambda signature:
-            // (instance, @event, cancallationToken) => instance.HandleEventAsync(@event, cancellationToken);
-            Func<TAttributed, TEvent, CancellationToken, Task> cancellableAsyncDelegate = Expression.Lambda<Func<TAttributed, TEvent, CancellationToken, Task>>(callExpression, new[] 
-            {  
-                instanceParameterExpression,
-                eventParameterExpression,
-                CancellationTokenParameterExpression
-            }).Compile();
-
-            return EventHandlerDelegateBuilder.FromDelegate(attributedObjectFactory, cancellableAsyncDelegate);
+            return EventHandlerDelegateBuilder.FromDelegate(InstanceFactory, cancellableAsyncDelegate);
         }
 
         /// <summary>
@@ -163,26 +150,16 @@ namespace Xer.Cqrs.EventStack.Extensions.Attributes
         /// </summary>
         /// <typeparam name="TAttributed">Type that contains [EventHandler] methods. This should match DeclaringType property.</typeparam>
         /// <typeparam name="TEvent">Type of event that is handled by the EventHandlerAttributeMethod. This should match EventType property.</typeparam>
-        /// <param name="attributedObjectFactory">Factory delegate which provides an instance of a class that contains methods marked with [EventHandler] attribute.</param>
         /// <returns>Delegate that handles an event.</returns>
-        private MessageHandlerDelegate BuildNonCancellableAsyncDelegate<TAttributed, TEvent>(Func<object> attributedObjectFactory)
+        private MessageHandlerDelegate BuildNonCancellableAsyncDelegate<TAttributed, TEvent>()
             where TAttributed : class
             where TEvent : class
         {
-            // Create an expression that will invoke the event handler method of a given instance.
-            ParameterExpression instanceParameterExpression = Expression.Parameter(typeof(TAttributed), "instance");
-            ParameterExpression eventParameterExpression = Expression.Parameter(typeof(TEvent), "event");
-            MethodCallExpression callExpression = Expression.Call(instanceParameterExpression, MethodInfo, eventParameterExpression);
+            // Create a delegate from method info. First argument is the target object.
+            Func<TAttributed, TEvent, Task> nonCancellableAsyncDelegate = (Func<TAttributed, TEvent, Task>)
+                MethodInfo.CreateDelegate(typeof(Func<TAttributed, TEvent, Task>));
 
-            // Lambda signature:
-            // (instance, @event) => instance.HandleEventAsync(@event);
-            Func<TAttributed, TEvent, Task> nonCancellableAsyncDelegate = Expression.Lambda<Func<TAttributed, TEvent, Task>>(callExpression, new[] 
-            {  
-                instanceParameterExpression,
-                eventParameterExpression
-            }).Compile();
-
-            return EventHandlerDelegateBuilder.FromDelegate(attributedObjectFactory, nonCancellableAsyncDelegate);
+            return EventHandlerDelegateBuilder.FromDelegate(InstanceFactory, nonCancellableAsyncDelegate);
         }
 
         /// <summary>
@@ -190,26 +167,16 @@ namespace Xer.Cqrs.EventStack.Extensions.Attributes
         /// </summary>
         /// <typeparam name="TAttributed">Type that contains [EventHandler] methods. This should match DeclaringType property.</typeparam>
         /// <typeparam name="TEvent">Type of event that is handled by the EventHandlerAttributeMethod. This should match EventType property.</typeparam>
-        /// <param name="attributedObjectFactory">Factory delegate which provides an instance of a class that contains methods marked with [EventHandler] attribute.</param>
         /// <returns>Delegate that handles an event.</returns>
-        private MessageHandlerDelegate BuildWrappedSyncDelegate<TAttributed, TEvent>(Func<object> attributedObjectFactory)
+        private MessageHandlerDelegate BuildWrappedSyncDelegate<TAttributed, TEvent>()
             where TAttributed : class
             where TEvent : class
         {
-            // Create an expression that will invoke the event handler method of a given instance.
-            ParameterExpression instanceParameterExpression = Expression.Parameter(typeof(TAttributed), "instance");
-            ParameterExpression eventParameterExpression = Expression.Parameter(typeof(TEvent), "event");
-            MethodCallExpression callExpression = Expression.Call(instanceParameterExpression, MethodInfo, eventParameterExpression);
-
-            // Lambda signature:
-            // (instance, @event) => instance.HandleEvent(@event);
-            Action<TAttributed, TEvent> action = Expression.Lambda<Action<TAttributed, TEvent>>(callExpression, new[] 
-            {  
-                instanceParameterExpression,
-                eventParameterExpression
-            }).Compile();
+            // Create a delegate from method info. First argument is the target object.
+            Action<TAttributed, TEvent> action = (Action<TAttributed, TEvent>)
+                MethodInfo.CreateDelegate(typeof(Action<TAttributed, TEvent>));
             
-            return EventHandlerDelegateBuilder.FromDelegate(attributedObjectFactory, action, yieldSynchronousExecution: YieldSynchronousExecution);
+            return EventHandlerDelegateBuilder.FromDelegate(InstanceFactory, action, yieldSynchronousExecution: YieldSynchronousExecution);
         }
 
         /// <summary>
@@ -221,7 +188,7 @@ namespace Xer.Cqrs.EventStack.Extensions.Attributes
         {
             return (MessageHandlerDelegate)openGenericBuildDelegateMethodInfo
                 .MakeGenericMethod(DeclaringType, EventType)
-                .Invoke(this, new[] {  InstanceFactory });
+                .Invoke(this, new object[] { /* No arguments */ });
         }
 
         #endregion Functions
