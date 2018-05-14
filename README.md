@@ -10,13 +10,6 @@ Attribute registration extension for Xer.Cqrs.EventStack
 # Nuget
 [![NuGet](https://img.shields.io/nuget/vpre/xer.cqrs.eventstack.extensions.attributes.svg)](https://www.nuget.org/packages/Xer.Cqrs.EventStack.Extensions.Attributes/)
 
-## Build
-
-| Branch | Status |
-|--------|--------|
-| Master | [![Build status](https://ci.appveyor.com/api/projects/status/sq6a7sdi7rnjpnl7/branch/master?svg=true)](https://ci.appveyor.com/project/XerProjects25246/xer-cqrs-eventstack/branch/master) |
-| Dev | [![Build status](https://ci.appveyor.com/api/projects/status/sq6a7sdi7rnjpnl7/branch/dev?svg=true)](https://ci.appveyor.com/project/XerProjects25246/xer-cqrs-eventstack/branch/dev) |
-
 
 ## Installation
 You can simply clone this repository, build the source, reference the dll from the project, and code away!
