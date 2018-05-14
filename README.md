@@ -33,6 +33,7 @@ To install Nuget packages:
 ### Event Handler Attribute Registration
 
 ```csharp
+// Example event.
 public class ProductRegisteredEvent
 {
     public int ProductId { get; }
@@ -44,22 +45,8 @@ public class ProductRegisteredEvent
         ProductName = productName;
     }
 }
-```
-```csharp
-public EventDelegator RegisterEventHandlers()
-{
-    // MultiMessageHandlerRegistration allows registration of a multiple message handlers per message type.
-    var registration = new MultiMessageHandlerRegistration();
 
-    // Register all methods with [EventHandler] attribute.
-    registration.RegisterEventHandlerAttributes(() => new ProductRegisteredEventHandlers(new ProductRepository());
-
-    // Build the delegator.
-    var resolver = registration.BuildMessageHandlerResolver();
-    return new EventDelegator(resolver);
-}
-```
-```csharp
+// Example event handlers.
 public class ProductRegisteredEventHandlers : IEventHandler<ProductRegisteredEvent>
 {
     // Sync event handler.
@@ -76,5 +63,20 @@ public class ProductRegisteredEventHandlers : IEventHandler<ProductRegisteredEve
         System.Console.WriteLine($"Sending email notification...");
         return Task.CompletedTask;
     }
+}
+```
+```csharp
+// Event Handler Registration.
+public EventDelegator RegisterEventHandlers()
+{
+    // MultiMessageHandlerRegistration allows registration of a multiple message handlers per message type.
+    var registration = new MultiMessageHandlerRegistration();
+
+    // Register all methods with [EventHandler] attribute.
+    registration.RegisterEventHandlerAttributes(() => new ProductRegisteredEventHandlers(new ProductRepository());
+
+    // Build the event delegator.
+    IMessageHandlerResolver resolver = registration.BuildMessageHandlerResolver();
+    return new EventDelegator(resolver);
 }
 ```
